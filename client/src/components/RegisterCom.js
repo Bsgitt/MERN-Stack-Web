@@ -1,27 +1,27 @@
 import React, { Component } from "react";
-import { Link } from "react-router-dom";
+import { Link, withRouter } from "react-router-dom";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
-import { loginUser } from "../actions/authActions";
-class Login extends Component {
+import { registerUser } from "../actions/authActions";
+import classnames from "classnames";
+class Register extends Component {
   constructor() {
     super();
     this.state = {
+      name: "",
       email: "",
       password: "",
+      password2: "",
       errors: {},
     };
   }
   componentDidMount() {
-    // If logged in and user navigates to Login page, should redirect them to dashboard
+    // If logged in and user navigates to Register page, should redirect them to dashboard
     if (this.props.auth.isAuthenticated) {
       this.props.history.push("/dashboard");
     }
   }
   componentWillReceiveProps(nextProps) {
-    if (nextProps.auth.isAuthenticated) {
-      this.props.history.push("/dashboard"); //push to dashboard page
-    }
     if (nextProps.errors) {
       this.setState({
         errors: nextProps.errors,
@@ -33,12 +33,15 @@ class Login extends Component {
   };
   onSubmit = (e) => {
     e.preventDefault();
-    const userData = {
+    const newUser = {
+      name: this.state.name,
       email: this.state.email,
       password: this.state.password,
+      password2: this.state.password2,
     };
-    this.props.loginUser(userData);
-    console.log(userData);
+    console.log(newUser);
+    // send props history
+    this.props.registerUser(newUser, this.props.history);
   };
   render() {
     const { errors } = this.state;
@@ -47,13 +50,24 @@ class Login extends Component {
         <div className='"form-group"'>
           <div className='col s12' style={{ paddingLeft: "11.250px" }}>
             <h4>
-              <b>Login</b>
+              <b>Register</b> below
             </h4>
             <p className='grey-text text-darken-1'>
-              Already have an account? <Link to='/register'>Register</Link>
+              Already have an account? <Link to='/login'>Log in</Link>
             </p>
           </div>
           <form noValidate onSubmit={this.onSubmit}>
+            <div className='col-md-6 mb-3'>
+              <label htmlFor='name'>Name</label>
+              <input
+                className='form-control'
+                onChange={this.onChange}
+                value={this.state.name}
+                error={errors.name}
+                id='name'
+                type='text'
+              />
+            </div>
             <div className='col-md-6 mb-3'>
               <label htmlFor='email'>Email</label>
               <input
@@ -76,7 +90,17 @@ class Login extends Component {
                 type='password'
               />
             </div>
-
+            <div className='col-md-6 mb-3'>
+              <label htmlFor='password2'>Confirm Password</label>
+              <input
+                className='form-control'
+                onChange={this.onChange}
+                value={this.state.password2}
+                error={errors.password2}
+                id='password2'
+                type='password'
+              />
+            </div>
             <div className='col s12' style={{ paddingLeft: "11.250px" }}>
               <button
                 style={{
@@ -88,7 +112,7 @@ class Login extends Component {
                 type='submit'
                 className='btn btn-success'
               >
-                Log in
+                Sign up
               </button>
             </div>
           </form>
@@ -97,8 +121,8 @@ class Login extends Component {
     );
   }
 }
-Login.propTypes = {
-  loginUser: PropTypes.func.isRequired,
+Register.propTypes = {
+  registerUser: PropTypes.func.isRequired,
   auth: PropTypes.object.isRequired,
   errors: PropTypes.object.isRequired,
 };
@@ -106,4 +130,4 @@ const mapStateToProps = (state) => ({
   auth: state.auth,
   errors: state.errors,
 });
-export default connect(mapStateToProps, { loginUser })(Login);
+export default connect(mapStateToProps, { registerUser })(withRouter(Register));
